@@ -1,0 +1,168 @@
+--// GUI Base
+local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "WFRNG_GUI"
+
+local Tabs = {}
+local UIS = game:GetService("UserInputService")
+
+--// Main Frame
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 420, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+--// Tabs Header
+for i, name in ipairs({"Main", "Movement", "Visual", "Protection"}) do
+	local TabBtn = Instance.new("TextButton", MainFrame)
+	TabBtn.Size = UDim2.new(0, 100, 0, 30)
+	TabBtn.Position = UDim2.new(0, (i-1)*105 + 5, 0, 5)
+	TabBtn.Text = name
+	TabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	TabBtn.TextColor3 = Color3.new(1,1,1)
+
+	local TabFrame = Instance.new("Frame", MainFrame)
+	TabFrame.Size = UDim2.new(0, 400, 0, 250)
+	TabFrame.Position = UDim2.new(0, 10, 0, 40)
+	TabFrame.BackgroundTransparency = 1
+	TabFrame.Visible = i == 1
+
+	Tabs[name] = TabFrame
+
+	TabBtn.MouseButton1Click:Connect(function()
+		for _, tab in pairs(Tabs) do tab.Visible = false end
+		TabFrame.Visible = true
+	end)
+end
+
+local function AddToggle(parent, label, callback)
+	local Button = Instance.new("TextButton", parent)
+	Button.Size = UDim2.new(1, -10, 0, 30)
+	Button.Position = UDim2.new(0, 5, 0, #parent:GetChildren() * 35)
+	Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	Button.TextColor3 = Color3.new(1, 1, 1)
+	Button.Text = "OFF - " .. label
+	local active = false
+
+	Button.MouseButton1Click:Connect(function()
+		active = not active
+		Button.Text = (active and "ON  - " or "OFF - ") .. label
+		callback(active)
+	end)
+end
+
+--// Functions
+local function InfiniteHealth(active)
+	while active do
+		local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+		if hum then hum.Health = hum.MaxHealth end
+		wait(0.2)
+	end
+end
+
+local function BoostEXP(active)
+	while active do
+		local rs = game:GetService("ReplicatedStorage")
+		local evt = rs:FindFirstChild("GainEXP")
+		if evt then evt:FireServer(999999) end
+		wait(0.5)
+	end
+end
+
+local function AutoEgg(active)
+	while active do
+		local hatch = game:GetService("ReplicatedStorage"):FindFirstChild("HatchEgg")
+		if hatch then hatch:FireServer("Legendary") end
+		wait(1)
+	end
+end
+
+local function AutoRoll(active)
+	while active do
+		local roll = game:GetService("ReplicatedStorage"):FindFirstChild("RollPower")
+		if roll then roll:FireServer() end
+		wait(0.5)
+	end
+end
+
+local function UnlockWeapons(active)
+	if active then
+		local ws = game:GetService("Workspace"):FindFirstChild("Weapons")
+		if ws then
+			for _, w in pairs(ws:GetChildren()) do
+				w:Clone().Parent = game.Players.LocalPlayer.Backpack
+			end
+		end
+	end
+end
+
+local function SpeedToggle(active)
+	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = active and 100 or 16
+end
+
+local function JumpToggle(active)
+	game.Players.LocalPlayer.Character.Humanoid.JumpPower = active and 120 or 50
+end
+
+local function ESP(active)
+	for _, v in pairs(game.Players:GetPlayers()) do
+		if v ~= game.Players.LocalPlayer then
+			local highlight = Instance.new("Highlight", v.Character)
+			highlight.Name = "ESP_Highlight"
+			highlight.FillColor = Color3.new(1, 0, 0)
+		end
+	end
+	if not active then
+		for _, p in pairs(game.Players:GetPlayers()) do
+			if p.Character:FindFirstChild("ESP_Highlight") then
+				p.Character:FindFirstChild("ESP_Highlight"):Destroy()
+			end
+		end
+	end
+end
+
+local function TeleportNPC(active)
+	if active then
+		local npc = game:GetService("Workspace"):FindFirstChild("NPC")
+		if npc then
+			game.Players.LocalPlayer.Character:MoveTo(npc.Position)
+		end
+	end
+end
+
+local function AntiKick(active)
+	if active then
+		local mt = getrawmetatable(game)
+		local old = mt.__namecall
+		setreadonly(mt, false)
+		mt.__namecall = newcclosure(function(self, ...)
+			local method = getnamecallmethod()
+			if method == "Kick" then return end
+			return old(self, ...)
+		end)
+	end
+end
+
+local function AntiBan(active)
+	if active then
+		game:GetService("Players").LocalPlayer:Kick = function() end
+	end
+end
+
+--// Add All Toggles
+AddToggle(Tabs.Main, "Infinite Health", InfiniteHealth)
+AddToggle(Tabs.Main, "Boost x10 EXP", BoostEXP)
+AddToggle(Tabs.Main, "Auto Egg Hatch", AutoEgg)
+AddToggle(Tabs.Main, "Auto Roll", AutoRoll)
+AddToggle(Tabs.Main, "Unlock All Weapons", UnlockWeapons)
+
+AddToggle(Tabs.Movement, "WalkSpeed Boost", SpeedToggle)
+AddToggle(Tabs.Movement, "JumpPower Boost", JumpToggle)
+
+AddToggle(Tabs.Visual, "ESP Players", ESP)
+AddToggle(Tabs.Visual, "Teleport to NPC", TeleportNPC)
+
+AddToggle(Tabs.Protection, "Anti-Kick", AntiKick)
+AddToggle(Tabs.Protection, "Anti-Ban", AntiBan)
