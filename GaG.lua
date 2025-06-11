@@ -1,95 +1,46 @@
--- GaG.lua GUI Version by Sophia 😎
+local ScreenGui = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+local Toggle = Instance.new("TextButton")
+local MoneyBox = Instance.new("TextBox")
+local MoneyBtn = Instance.new("TextButton")
 
-local player = game.Players.LocalPlayer
-local rs = game:GetService("ReplicatedStorage")
-local coreGui = game:GetService("CoreGui")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Name = "SpeedHubGUI"
 
-local ScreenGui = Instance.new("ScreenGui", coreGui)
-ScreenGui.Name = "SophiaHackUI"
+Main.Name = "Main"
+Main.Parent = ScreenGui
+Main.Size = UDim2.new(0, 300, 0, 250)
+Main.Position = UDim2.new(0.3, 0, 0.3, 0)
+Main.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Main.Active = true
+Main.Draggable = true
 
-local frame = Instance.new("Frame", ScreenGui)
-frame.Size = UDim2.new(0, 200, 0, 250)
-frame.Position = UDim2.new(0, 20, 0, 100)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
+Toggle.Name = "Toggle"
+Toggle.Parent = ScreenGui
+Toggle.Size = UDim2.new(0, 100, 0, 30)
+Toggle.Position = UDim2.new(0, 10, 0, 10)
+Toggle.Text = "Show/Hide"
+Toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 
-local UICorner = Instance.new("UICorner", frame)
-
-local title = Instance.new("TextLabel", frame)
-title.Text = "Sophia's Hack 🌚"
-title.Size = UDim2.new(1, 0, 0, 30)
-title.TextColor3 = Color3.new(1, 1, 1)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-
-local toggles = { Money = false, Farm = false, Grow = false, Sell = false }
-
-local function createButton(name, posY)
-    local btn = Instance.new("TextButton", frame)
-    btn.Size = UDim2.new(1, -20, 0, 30)
-    btn.Position = UDim2.new(0, 10, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 14
-    btn.Text = name .. ": OFF"
-    local corner = Instance.new("UICorner", btn)
-    btn.MouseButton1Click:Connect(function()
-        toggles[name] = not toggles[name]
-        btn.Text = name .. ": " .. (toggles[name] and "ON" or "OFF")
-    end)
-end
-
-createButton("Money", 40)
-createButton("Farm", 80)
-createButton("Grow", 120)
-createButton("Sell", 160)
-
-spawn(function()
-    while true do
-        if toggles.Money then
-            local remote = rs:FindFirstChild("AddMoney")
-            if remote then remote:FireServer(9999999) end
-        end
-        wait(0.3)
-    end
+Toggle.MouseButton1Click:Connect(function()
+	Main.Visible = not Main.Visible
 end)
 
-spawn(function()
-    while true do
-        if toggles.Farm then
-            for _,plot in pairs(workspace.Plants:GetChildren()) do
-                if plot:FindFirstChild("PlantSeed") then
-                    plot.PlantSeed:FireServer("CandyBlossom")
-                end
-            end
-        end
-        wait(1)
-    end
-end)
+MoneyBox.Parent = Main
+MoneyBox.Size = UDim2.new(0, 180, 0, 30)
+MoneyBox.Position = UDim2.new(0, 10, 0, 40)
+MoneyBox.PlaceholderText = "Enter amount"
+MoneyBox.Text = ""
 
-spawn(function()
-    while true do
-        if toggles.Grow then
-            for _,plant in pairs(workspace.Plants:GetChildren()) do
-                if plant:FindFirstChild("Grow") then
-                    plant.Grow:FireServer()
-                end
-            end
-        end
-        wait(1)
-    end
-end)
+MoneyBtn.Parent = Main
+MoneyBtn.Size = UDim2.new(0, 180, 0, 30)
+MoneyBtn.Position = UDim2.new(0, 10, 0, 80)
+MoneyBtn.Text = "Add Money"
 
-spawn(function()
-    while true do
-        if toggles.Sell then
-            local sellRemote = rs:FindFirstChild("SellAll")
-            if sellRemote then sellRemote:FireServer() end
-        end
-        wait(3)
-    end
+MoneyBtn.MouseButton1Click:Connect(function()
+	local amount = tonumber(MoneyBox.Text)
+	if amount then
+		-- Example: replace with actual remote call
+		print("Adding money:", amount)
+	end
 end)
-
-print("✅ Sophia GUI Hack Loaded.")
